@@ -40,11 +40,11 @@ under the License.
   </properties>
 
   <dependencies>
-    <dependency>
+    <!--<dependency>
       <groupId>org.apache.syncope.wa</groupId>
       <artifactId>syncope-wa-starter</artifactId>
       <version>${project.version}</version>
-    </dependency>
+    </dependency>-->
 
     <dependency>
       <groupId>org.apache.syncope.common.keymaster.self</groupId>
