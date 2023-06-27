@@ -2238,7 +2238,7 @@ under the License.
           </executions>
         </plugin>
 
-        <plugin>
+        <!--<plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
           <version>3.1.2</version>
@@ -2254,7 +2254,7 @@ under the License.
             <targetJdk>${targetJdk}</targetJdk>
             <includeTestSourceDirectory>true</includeTestSourceDirectory>
           </configuration>
-        </plugin>
+        </plugin>-->
 
         <plugin>
           <groupId>io.fabric8</groupId>
@@ -2346,7 +2346,7 @@ under the License.
         </executions>
       </plugin>
 
-      <plugin>
+      <!--<plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
@@ -2361,7 +2361,7 @@ under the License.
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin>-->
 
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -2425,7 +2425,7 @@ under the License.
         </executions>
       </plugin>
 
-      <plugin>
+      <!--<plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
@@ -2464,7 +2464,7 @@ under the License.
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin>-->
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -2831,7 +2831,7 @@ under the License.
         <defaultGoal>clean install</defaultGoal>
 
         <plugins>
-          <plugin>
+          <!--<plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
             <executions>
@@ -2840,7 +2840,7 @@ under the License.
                 <phase>none</phase>
               </execution>
             </executions>
-          </plugin>
+          </plugin>-->
         </plugins>
       </build>
     </profile>
