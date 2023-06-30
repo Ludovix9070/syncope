@@ -193,12 +193,14 @@ under the License.
               <targetClasses>
                 <!-- classes to test -->
                 <param>org.apache.syncope.core.spring.security.Encryptor</param>
+                <param>org.apache.syncope.core.spring.security.DefaultPasswordGenerator</param>
               </targetClasses>
               <targetTests>
                 <!-- test implementations -->
                 <param>org.apache.syncope.core.spring.security.encryptorTest.EncryptorEncodeTest</param>
                 <param>org.apache.syncope.core.spring.security.encryptorTest.EncryptorDecodeTest</param>
                 <param>org.apache.syncope.core.spring.security.encryptorTest.EncryptorVerifyTest</param>
+                <param>org.apache.syncope.core.spring.security.defaultPasswordGeneratorTest.DefaultPasswordGeneratorGTest</param>
               </targetTests>
               <avoidCallsTo>
                 <avoidCallsTo>org.slf4j</avoidCallsTo>
