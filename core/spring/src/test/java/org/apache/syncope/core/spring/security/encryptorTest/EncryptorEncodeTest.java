@@ -26,6 +26,8 @@ public class EncryptorEncodeTest extends EncryptorStartTest {
     private CipherAlgorithm cipherAlgorithm;
     private Object expected;
     private Encryptor encryptor;
+    private Encryptor custom;
+    private static final String fakeSecretKey = generateRandomString(15);
     private static String filledString = generateRandomString(130);
     private static String emptyString = "";
 
@@ -89,6 +91,7 @@ public class EncryptorEncodeTest extends EncryptorStartTest {
     @Before
     public void setUp(){
         this.encryptor = Encryptor.getInstance();
+        this.custom = Encryptor.getInstance(fakeSecretKey);
     }
 
 
