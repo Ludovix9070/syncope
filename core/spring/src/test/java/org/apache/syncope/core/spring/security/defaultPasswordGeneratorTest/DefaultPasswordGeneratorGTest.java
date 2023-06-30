@@ -8,6 +8,7 @@ import org.apache.syncope.core.provisioning.api.serialization.POJOHelper;
 import org.apache.syncope.core.spring.ApplicationContextProvider;
 import org.apache.syncope.core.spring.security.DefaultPasswordGenerator;
 import org.apache.syncope.core.spring.security.SecurityProperties;
+import org.apache.syncope.core.spring.security.defaultPasswordGeneratorTest.utilities.MyExternalResource;
 import org.apache.syncope.core.spring.security.defaultPasswordGeneratorTest.utilities.MyImplementation;
 import org.apache.syncope.core.spring.security.defaultPasswordGeneratorTest.utilities.MyImplementationLookup;
 import org.apache.syncope.core.spring.security.defaultPasswordGeneratorTest.utilities.MyPasswordPolicy;
@@ -67,13 +68,22 @@ public class DefaultPasswordGeneratorGTest extends TestCase {
                 {createPolicies(Types.LOWERCASE), Types.LOWERCASE, null},
                 {createPolicies(Types.DIGIT), Types.DIGIT, null},
                 {createPolicies(Types.SPECIAL), Types.SPECIAL, IllegalArgumentException.class}, //lista vuota
-                {createConflict(),null, NullPointerException.class},//to check
                 {createPolicies(Types.SPECIAL_CHARS), Types.SPECIAL_CHARS, null},
                 {createPolicies(Types.ILLEGAL_CHARS), Types.ILLEGAL_CHARS, null}, //to check
                 //{createPolicies(Types.REPEAT_SAME), Types.REPEAT_SAME, null},
                 {createPolicies(Types.WORD_NOT_PERMITTED), Types.WORD_NOT_PERMITTED, null},
                 {createPolicies(Types.MIN_MAX), Types.MIN_MAX, null},
                 {createPolicies(Types.NOT_UPPERCASE), Types.NOT_UPPERCASE, null},
+                {createConflict(),null, NullPointerException.class},
+
+                //tests for external resources
+                {createPolicies(Types.MIN_LENGTH),Types.EXTERNAL, null},
+                {null,Types.EXTERNAL_NULL, null},
+
+                //tests to have better branch coverage
+                {createPolicies(Types.MAX_MIN_IF_ZERO), Types.MAX_MIN_IF_ZERO, null},
+                {createPolicies(Types.MAX_BRANCH), Types.MAX_BRANCH, null},
+                {createLambda(), Types.LAMBDA, null},
 
 
 
@@ -104,10 +114,62 @@ public class DefaultPasswordGeneratorGTest extends TestCase {
     }
 
     public static List<PasswordPolicy> createConflict(){
-        List<PasswordPolicy> mergedPolicies = new ArrayList<PasswordPolicy>();
-        mergedPolicies.addAll(createPolicies(Types.CONFLICT_MAX));
-        mergedPolicies.addAll(createPolicies(Types.CONFLICT_UPPER));
-        return mergedPolicies;
+        DefaultPasswordRuleConf config = new DefaultPasswordRuleConf();
+        config.setMaxLength(12);
+        MyImplementation rule = new MyImplementation();
+        rule.setBody(POJOHelper.serialize(config));
+        MyPasswordPolicy myPassPolicy = new MyPasswordPolicy();
+        myPassPolicy.add(rule);
+
+
+        DefaultPasswordRuleConf config2 = new DefaultPasswordRuleConf();
+        config2.setUppercase(15);
+        MyImplementation rule2 = new MyImplementation();
+        rule.setBody(POJOHelper.serialize(config));
+        MyPasswordPolicy myPassPolicy2 = new MyPasswordPolicy();
+        myPassPolicy2.add(rule2);
+
+        List<PasswordPolicy> policiesConflict = List.of(myPassPolicy,myPassPolicy2);
+        return policiesConflict;
+
+    }
+
+    public static List<PasswordPolicy> createLambda(){
+        DefaultPasswordRuleConf config = new DefaultPasswordRuleConf();
+        config.setSpecial(1);
+        config.getSpecialChars().add('$');
+        config.getSpecialChars().add('%');
+        config.getSpecialChars().add('£');
+        config.getSpecialChars().add('@');
+        config.getIllegalChars().add('x');
+        config.getIllegalChars().add('y');
+        config.getIllegalChars().add('z');
+        config.getWordsNotPermitted().add("forbidden");
+        MyImplementation rule = new MyImplementation();
+        rule.setBody(POJOHelper.serialize(config));
+        MyPasswordPolicy myPassPolicy = new MyPasswordPolicy();
+        myPassPolicy.add(rule);
+
+
+        DefaultPasswordRuleConf config2 = new DefaultPasswordRuleConf();
+        config2.setSpecial(1);
+        config2.getSpecialChars().add('$');
+        config2.getSpecialChars().add('%');
+        config2.getSpecialChars().add('£');
+        config2.getSpecialChars().add('@');
+        config2.getIllegalChars().add('x');
+        config2.getIllegalChars().add('y');
+        config2.getIllegalChars().add('z');
+        config2.getWordsNotPermitted().add("forbidden");
+        config2.setUppercase(15);
+        MyImplementation rule2 = new MyImplementation();
+        rule.setBody(POJOHelper.serialize(config));
+        MyPasswordPolicy myPassPolicy2 = new MyPasswordPolicy();
+        myPassPolicy2.add(rule2);
+
+        List<PasswordPolicy> policiesLambda = List.of(myPassPolicy,myPassPolicy2);
+        return policiesLambda;
+
     }
 
     public static List<PasswordPolicy> createPolicies(Types policiesType){
@@ -133,6 +195,7 @@ public class DefaultPasswordGeneratorGTest extends TestCase {
                 policy = new ArrayList<PasswordPolicy>();
                 break;
 
+            case EXTERNAL:
             case MIN_LENGTH:
                 config.setMinLength(minLength+1);
                 policy = createPolicy(config);
@@ -143,13 +206,18 @@ public class DefaultPasswordGeneratorGTest extends TestCase {
                 policy = createPolicy(config);
                 break;
 
+            case MAX_BRANCH:
+                config.setMaxLength(maxLength+1);
+                policy = createPolicy(config);
+                break;
+
             case CONFLICT_MAX:
-                config.setMaxLength(3);
+                config.setMaxLength(12);
                 policy = createPolicy(config);
                 break;
 
             case CONFLICT_UPPER:
-                config.setUppercase(5);
+                config.setUppercase(15);
                 policy = createPolicy(config);
                 break;
 
@@ -211,6 +279,13 @@ public class DefaultPasswordGeneratorGTest extends TestCase {
                 policy = createPolicy(config);
                 break;
 
+            case MAX_MIN_IF_ZERO:
+                config.setMaxLength(minLength-1);
+                config.setUsernameAllowed(true);
+                policy = createPolicy(config);
+                break;
+
+            case EXTERNAL_NULL:
             case NULL:
             default:
                 policy = null;
@@ -229,10 +304,13 @@ public class DefaultPasswordGeneratorGTest extends TestCase {
                 result = password.matches(".*[a-zA-Z].*");
                 break;
 
+            case MAX_MIN_IF_ZERO:
+            case EXTERNAL_NULL:
             case EMPTY:
                 result = true;
                 break;
 
+            case EXTERNAL:
             case MIN_LENGTH:
                 if(password.length() <= minLength){
                     result = false;
@@ -243,6 +321,14 @@ public class DefaultPasswordGeneratorGTest extends TestCase {
 
             case MAX_LENGTH:
                 if(password.length() >= maxLength){
+                    result = false;
+                }else{
+                    result = true;
+                }
+                break;
+
+            case MAX_BRANCH:
+                if(password.length() > maxLength){
                     result = false;
                 }else{
                     result = true;
@@ -277,6 +363,10 @@ public class DefaultPasswordGeneratorGTest extends TestCase {
                 result = !password.contains("forbidden");
                 break;
 
+            case LAMBDA:
+                result = (!password.contains("forbidden") && password.matches(".*[$%£@].*") && password.matches(".*[^x-z].*"));
+                break;
+
             case MIN_MAX:
             case INVALID:
             default:
@@ -291,8 +381,20 @@ public class DefaultPasswordGeneratorGTest extends TestCase {
         String generatedPassword;
         try {
             DefaultPasswordGenerator defaultPasswordGenerator = new DefaultPasswordGenerator();
-            generatedPassword = defaultPasswordGenerator.generate(this.policies);
-            //System.out.println("password"+generatedPassword+"\n");
+            if(this.type != Types.EXTERNAL && this.type != Types.EXTERNAL_NULL){
+                generatedPassword = defaultPasswordGenerator.generate(this.policies);
+            }else{
+                MyExternalResource myExternalResource = new MyExternalResource();
+                if(type == Types.EXTERNAL){
+                    myExternalResource.setPasswordPolicy(policies.get(0));
+                }else{
+                    myExternalResource.setPasswordPolicy(null);
+                }
+
+                generatedPassword = defaultPasswordGenerator.generate(myExternalResource);
+            }
+
+            //System.out.println("password "+generatedPassword+"\n");
             Assert.assertTrue(check(generatedPassword, type));
 
         } catch (Exception e) {
@@ -303,6 +405,7 @@ public class DefaultPasswordGeneratorGTest extends TestCase {
 
     public enum Types{
         VALID, INVALID, ALPHA, NULL, EMPTY, MIN_LENGTH, MAX_LENGTH, UPPERCASE, LOWERCASE, DIGIT, SPECIAL, SPECIAL_CHARS,
-        ILLEGAL_CHARS, REPEAT_SAME, WORD_NOT_PERMITTED, CONFLICT_MAX, CONFLICT_UPPER, MIN_MAX, NOT_UPPERCASE
+        ILLEGAL_CHARS, REPEAT_SAME, WORD_NOT_PERMITTED, CONFLICT_MAX, CONFLICT_UPPER, MIN_MAX, NOT_UPPERCASE, EXTERNAL,
+        EXTERNAL_NULL, MAX_MIN_IF_ZERO, MAX_BRANCH, LAMBDA
     }
 }
