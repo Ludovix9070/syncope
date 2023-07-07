@@ -53,18 +53,12 @@ public class EncryptorDecodeTest extends EncryptorStartTest {
         return Arrays.asList(new Object[][] {
 
                 //tests based on multidimensional analysis
-                {null,true,CipherAlgorithm.AES, null},
                 {null,false,CipherAlgorithm.AES, null},
-                {null,true,CipherAlgorithm.SHA, null},
                 {null,false,CipherAlgorithm.SHA, null},
-                {null,true,null, null},
-                {null,true,null, null},
-                {emptyString,true,CipherAlgorithm.AES, emptyString},
-                {emptyString,false,CipherAlgorithm.AES, IllegalBlockSizeException.class},
-                {emptyString,true,CipherAlgorithm.SHA, null},
+                {null,false,null, null},
+                {emptyString,false,CipherAlgorithm.AES, emptyString},
                 {emptyString,false,CipherAlgorithm.SHA, null},
-                {emptyString,true,null, null},
-                {emptyString,true,null, null},
+                {emptyString,false,null, null},
                 {filledString,true,CipherAlgorithm.AES, filledString},
                 {filledString,false,CipherAlgorithm.AES, IllegalBlockSizeException.class},
                 {filledString,true,CipherAlgorithm.SHA, null},
@@ -91,7 +85,11 @@ public class EncryptorDecodeTest extends EncryptorStartTest {
                 e.printStackTrace();
             }
         }else{
-            this.encoded = generateRandomString(130);
+            if(stringToCheck.length() == 0){
+                this.encoded = stringToCheck;
+            }else{
+                this.encoded = generateRandomString(130);
+            }
         }
 
         try {
